@@ -5,12 +5,12 @@ from urllib.request import Request
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
-
+import uvicorn
 from dependencies.database import init_db
 from dependencies.config import get_config
-
 from routers import router as main_router
-
+from routers.users.user_controller import ChainStart
+import asyncio
 init_db(config=get_config())
 
 app = FastAPI(
@@ -66,3 +66,9 @@ async def exception_handler(request: Request, exc: Exception):
     logging.error(traceback.format_exc())
     response = JSONResponse(status_code=500, content={"context": exc})
     return await add_cors_to_response(request=request, response=response)
+
+
+# 애플리케이션 실행 (개발 서버)
+if __name__ == "__main__":
+    asyncio.run(ChainStart())  # ChainStart 함수를 비동기로 실행
+    uvicorn.run(app, host="0.0.0.0", port=8000)

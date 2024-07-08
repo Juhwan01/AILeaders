@@ -2,7 +2,6 @@ from domains import Service
 from fastapi import HTTPException, status
 
 from .repositories import UserRepository
-from .models import UserModel
 
 
 class UserService(Service):

@@ -15,8 +15,6 @@ from langchain_core.documents import Document
 from langchain.vectorstores import FAISS
 from kiwipiepy import Kiwi
 
-# 환경 변수 로드
-load_dotenv()
 kiwi = Kiwi()
 # 프롬프트 템플릿 설정
 prompt = PromptTemplate.from_template(
@@ -64,7 +62,7 @@ def extract_texts(dataset):
     print("추출된 텍스트:", texts)  # 디버그를 위해 출력
     return texts
 
-def create_chain_web(dataset_path):
+def create_chain(dataset_path):
     dataset = load_dataset(dataset_path)
     qa_pairs = extract_texts(dataset)  # 텍스트 추출 함수로 수정
 
@@ -99,17 +97,3 @@ def create_chain_web(dataset_path):
         | StrOutputParser()
     )
     return rag_chain
-
-
-
-# 예시 데이터셋 경로
-dataset_path = "Conversation_Data.json"
-
-# 체인 생성 및 실행
-chain = create_chain_web(dataset_path)
-
-# 검색 실행 예시
-query = "당행계좌로 송금할 때 수수료 얼마야?"
-# 직접 질문에 대한 답변도 받아보기
-response = chain.invoke(query)
-print(f"Question: {query}\nAnswer: {response}")
