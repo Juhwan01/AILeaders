@@ -63,18 +63,28 @@ def extract_texts(dataset):
     print("추출된 텍스트:", texts)  # 디버그를 위해 출력
     return texts
 
+def extract_text(dataset):
+    texts = []
+    for entry in dataset:
+        source = entry.get('source', '').strip()
+        response = entry.get('response', '').strip()
+        if source and response:
+            texts.append(Document(page_content=f"Source: {source}\nResponse: {response}"))
+    print("추출된 텍스트:", texts)  # 디버그를 위해 출력
+    return texts
+
 def create_chain(dataset_path):
     dataset = load_dataset(dataset_path)
-    qa_pairs = extract_texts(dataset)  # 텍스트 추출 함수로 수정
+    qa_pairs = extract_text(dataset)  # 텍스트 추출 함수로 수정
 
     if not qa_pairs:
         raise ValueError("The dataset does not contain any valid Q&A pairs.")
 
     # 텍스트 분할기 설정
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,  # 청크 크기를 늘려 더 많은 컨텍스트를 포함
-        chunk_overlap=100,  # 중복을 약간 허용하여 문맥 유지
-        separators=["Question:", "Answer:", "\n", " "]
+        chunk_size=1500,
+        chunk_overlap=200,
+        separators=["Source:", "Response:", "\n", ". ", " ", ""]
     )
 
 
@@ -94,7 +104,7 @@ def create_chain(dataset_path):
         retrievers=[kiwi_bm25, faiss],  # 사용할 검색 모델의 리스트
         weights=[0.3, 0.7],  # 각 검색 모델의 결과에 적용할 가중치
         search_type="mmr",  # 검색 결과의 다양성을 증진시키는 MMR 방식을 사용
-        search_kwargs={"k": 5}
+        search_kwargs={"k":3}
     )
     retrievers = kiwibm25_faiss_37
 

@@ -37,7 +37,7 @@ def detect_language(text):
         return 'en'  # 기본값으로 영어 설정
 
 async def ChainStart():
-    dataset_path = '민원.json'
+    dataset_path = 'log.json'
     chain = create_chain(dataset_path)
     chain_store.set_chain(chain)
     print("Chain created")
