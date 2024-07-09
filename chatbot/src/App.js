@@ -15,6 +15,7 @@ const ChatbotUI = () => {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const [language, setLanguage] = useState('ko'); // 언어 상태 추가
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -26,13 +27,17 @@ const ChatbotUI = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const startListening = () => {
     setIsListening(true);
-    SpeechRecognition.startListening({ continuous: true, language: 'ko' });
+    SpeechRecognition.startListening({ continuous: true, language: language });
   };
 
   const stopListening = () => {
@@ -44,7 +49,7 @@ const ChatbotUI = () => {
 
   const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ko-KR';
+    utterance.lang = language === 'ko' ? 'ko-KR' : 'en-US';
     window.speechSynthesis.speak(utterance);
   };
 
@@ -91,6 +96,10 @@ const ChatbotUI = () => {
     <div className="chatbot-container">
       <div className="chat-header">
         <h2>AI 챗봇</h2>
+        <select value={language} onChange={handleLanguageChange} className="language-selector">
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
       </div>
       <div className="chat-messages">
         {messages.map((message, index) => (
