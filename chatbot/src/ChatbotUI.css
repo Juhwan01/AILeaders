@@ -24,18 +24,29 @@ body, html {
     color: white;
     padding: 20px;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .chat-header h2 {
     margin: 0;
   }
-  
   .chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
     display: flex;
     flex-direction: column;
+  }
+  .language-selector {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: white;
+    color: #4a90e2;
+    cursor: pointer;
   }
   
   .message {
