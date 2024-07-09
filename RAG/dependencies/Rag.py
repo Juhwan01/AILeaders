@@ -1,5 +1,4 @@
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_teddynote.retrievers import KiwiBM25Retriever
 from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
@@ -70,7 +69,7 @@ def create_chain(dataset_path):
         raise ValueError("The dataset does not contain any valid Q&A pairs.")
 
     # 텍스트 분할기 설정
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=30, separators=[". ", "?"])
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=350, chunk_overlap=75,separators=["\n", ". ", "?"])
     splits = text_splitter.split_documents(qa_pairs)
 
     # 분할된 텍스트 출력 (디버깅용)
@@ -87,6 +86,7 @@ def create_chain(dataset_path):
         retrievers=[kiwi_bm25, faiss],  # 사용할 검색 모델의 리스트
         weights=[0.3, 0.7],  # 각 검색 모델의 결과에 적용할 가중치
         search_type="mmr",  # 검색 결과의 다양성을 증진시키는 MMR 방식을 사용
+        search_kwargs={"k": 4}
     )
     retrievers = kiwibm25_faiss_37
 
