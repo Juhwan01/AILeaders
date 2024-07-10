@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import json
 
 file_path = '민원.json'
@@ -16,33 +10,29 @@ with open(file_path, 'r') as file:
 print(json.dumps(data,ensure_ascii=False, indent=4))
 
 
-# In[ ]:
 
-
-# mmdata = dict()
-# for m in data:
-#     q = m['고객질문(요청)']
-#     a = m['상담사답변']
-#     id = m['대화셋일련번호']
+mmdata = dict()
+for m in data:
+    q = m['고객질문(요청)']
+    a = m['상담사답변']
+    id = m['대화셋일련번호']
     
-#     # mmdata에 대화셋일련번호가 없으면 추가
-#     if id not in mmdata:
-#         mmdata[id] = []
+    # mmdata에 대화셋일련번호가 없으면 추가
+    if id not in mmdata:
+        mmdata[id] = []
         
-#     # q 또는 a가 비어있지 않은 것만 추가
-#     if q != "":
-#         mmdata[id].append(q)
-#     if a != "":
-#         mmdata[id].append(a)
+    # q 또는 a가 비어있지 않은 것만 추가
+    if q != "":
+        mmdata[id].append(q)
+    if a != "":
+        mmdata[id].append(a)
         
-# mmdata
+mmdata
 
-# #JSon파일 출력
-# with open('mydata.json', 'w') as file:
-#     json.dump(mmdata, file, ensure_ascii=False, indent=4)
+#JSon파일 출력
+with open('mydata.json', 'w') as file:
+    json.dump(mmdata, file, ensure_ascii=False, indent=4)
 
-
-# In[ ]:
 
 
 # openAI API사용
@@ -51,7 +41,6 @@ print(json.dumps(data,ensure_ascii=False, indent=4))
 # 한묶음 -> openAI -> 질문 답변 -> 5000번
 
 
-# In[ ]:
 from openai import OpenAI
 from dotenv import load_dotenv
 import json
@@ -66,21 +55,9 @@ with open('mydata.json', 'r', encoding='utf-8') as f:
 data_str = json.dumps(data, ensure_ascii=False, indent=4)
 
 
-# In[ ]:
 data = list(data.values())
 data
 
-
-# In[ ]:
-
-
-#len(data)
-
-
-# In[ ]:
-
-
-#data0 = data[44]
 logs = []
 for d in data[:50]:
     stttt = '\n'.join(d)
@@ -104,8 +81,6 @@ with open('log.json', 'w', encoding='utf-8') as f:
     f.write(json.dumps(logs, ensure_ascii=False, indent=4))
 
 
-# In[ ]:
-
 
 # vector data 만들기 
 # chromdb use
@@ -117,8 +92,6 @@ with open('log.json', 'w', encoding='utf-8') as f:
 
 # 리트리버: 벡터 데이터를 가지고 검색하는 것
 
-
-# In[ ]:
 
 
 

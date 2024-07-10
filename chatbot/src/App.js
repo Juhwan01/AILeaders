@@ -131,8 +131,18 @@ const ChatbotUI = () => {
 
   const handleEndChat = async () => {
     try {
+      // 대화셋에 대한 고유 일련번호 생성
+      const dialogueSetId = `B${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+  
+      // 대화 내용을 새로운 형식으로 변환
+      const formattedMessages = messages.map((message, index) => ({
+        대화셋일련번호: dialogueSetId,
+        고객질문: message.sender === 'user' ? message.text : "",
+        상담사답변: message.sender === 'bot' ? message.text : ""
+      }));
+  
       // 서버에 대화 내용 전송
-      await axiosInstance.post("/save_chat", { messages: messages });
+      await axiosInstance.post("/save_chat", { messages: formattedMessages });
       
       // 대화 내용 초기화
       setMessages([]);
