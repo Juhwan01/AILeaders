@@ -55,7 +55,16 @@ body, html {
     border-radius: 20px;
     margin-bottom: 10px;
     word-wrap: break-word;
+    min-height: 40px; /* 최소 높이 설정 */
+    display: flex;
+    align-items: center;
   }
+  
+  .message-content {
+    width: 100%;
+    min-height: 20px; /* 내용의 최소 높이 */
+  }
+  
   
   .user {
     align-self: flex-end;
@@ -124,5 +133,59 @@ body, html {
     button {
       margin-left: 0;
       margin-top: 10px;
+    }
+    .loading-message {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .loading-text {
+      flex-grow: 1;
+    }
+    
+    .loading-dots {
+      width: 40px;
+      text-align: right;
+    }
+    
+    .loading-dots::after {
+      content: '';
+      animation: loadingDots 2s infinite;
+    }
+    
+    @keyframes loadingDots {
+      0% { content: '.'; }
+      25% { content: '..'; }
+      50% { content: '...'; }
+      75% { content: '....'; }
+    }
+    .loading-message {
+      display: flex;
+      align-items: center;
+    }
+    
+    .loading-dots span {
+      width: 10px;
+      height: 10px;
+      margin: 0 5px;
+      background-color: #4a90e2;
+      border-radius: 50%;
+      opacity: 0;
+      animation: loadingDots 1.5s infinite ease-in-out;
+    }
+    
+    .loading-dots span:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+    
+    .loading-dots span:nth-child(3) {
+      animation-delay: 1s;
+    }
+    
+    @keyframes loadingDots {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
     }
   }

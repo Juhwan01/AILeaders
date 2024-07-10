@@ -15,7 +15,9 @@ const ChatbotUI = () => {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
-  const [language, setLanguage] = useState('ko'); // 언어 상태 추가
+  const [language, setLanguage] = useState('ko');
+  const [isLoading, setIsLoading] = useState(false); // 새로운 상태 추가
+  const [loadingDots, setLoadingDots] = useState('');
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -26,6 +28,18 @@ const ChatbotUI = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    let interval;
+    if (isLoading) {
+      let dots = '';
+      interval = setInterval(() => {
+        dots = dots.length >= 4 ? '' : dots + '.';
+        setLoadingDots(dots);
+      }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
@@ -78,12 +92,20 @@ const ChatbotUI = () => {
     setMessages(prevMessages => [...prevMessages, newMessage]);
     setInput('');
 
+    setIsLoading(true);
+    setMessages(prevMessages => [...prevMessages, { sender: 'bot', loading: true }]);
+
     const answer = await getAnswer(text);
-    const botMessage = { text: answer, sender: 'bot' };
-    setMessages(prevMessages => [...prevMessages, botMessage]);
+    
+    setMessages(prevMessages => {
+      const updatedMessages = [...prevMessages];
+      updatedMessages[updatedMessages.length - 1] = { text: answer, sender: 'bot', loading: false };
+      return updatedMessages;
+    });
+    setIsLoading(false);
 
     speak(answer);
-    resetTranscript(); // Ensure transcript is reset after handling send
+    resetTranscript();
   };
 
   const handleKeyDown = (e) => {
@@ -104,7 +126,17 @@ const ChatbotUI = () => {
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.sender}`}>
-            {message.sender === 'user' ? '👤' : '🤖'} {message.text}
+            {message.sender === 'user' ? '👤' : '🤖'} 
+            <div className="message-content">
+              {message.loading ? (
+                <div className="loading-message">
+                  <span className="loading-text">AI가 답변을 생성 중입니다</span>
+                  <span className="loading-dots">{loadingDots}</span>
+                </div>
+              ) : (
+                message.text
+              )}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
