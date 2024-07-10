@@ -10,12 +10,15 @@ const axiosInstance = axios.create({
 });
 
 const ChatbotUI = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    return savedMessages ? JSON.parse(savedMessages) : [];
+  });
   const [input, setInput] = useState('');
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
-  const [language, setLanguage] = useState('ko'); // 언어 상태 추가
+  const [language, setLanguage] = useState('ko');
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -25,6 +28,7 @@ const ChatbotUI = () => {
 
   useEffect(() => {
     scrollToBottom();
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
 
   const handleLanguageChange = (e) => {
@@ -47,10 +51,21 @@ const ChatbotUI = () => {
     resetTranscript();
   };
 
-  const speak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-    window.speechSynthesis.speak(utterance);
+  const speak = async (text) => {
+    try {
+      const response = await axiosInstance.post(
+        "/tts",
+        { text: text, lang: language === 'ko' ? 'ko' : 'en' },
+        { responseType: 'blob' }
+      );
+      
+      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (error) {
+      console.error('TTS Error:', error);
+    }
   };
 
   const getAnswer = async (text) => {
@@ -83,12 +98,28 @@ const ChatbotUI = () => {
     setMessages(prevMessages => [...prevMessages, botMessage]);
 
     speak(answer);
-    resetTranscript(); // Ensure transcript is reset after handling send
+    resetTranscript();
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSend();
+    }
+  };
+
+  const handleEndChat = async () => {
+    try {
+      // 서버에 대화 내용 전송
+      await axiosInstance.post("/save_chat", { messages: messages });
+      
+      // 대화 내용 초기화
+      setMessages([]);
+      localStorage.removeItem('chatMessages');
+      
+      alert('대화가 서버에 저장되었고, 채팅이 초기화되었습니다.');
+    } catch (error) {
+      console.error('Error saving chat:', error);
+      alert('대화 저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -100,6 +131,9 @@ const ChatbotUI = () => {
           <option value="ko">한국어</option>
           <option value="en">English</option>
         </select>
+        <button onClick={handleEndChat} className="end-chat-button">
+          대화 종료
+        </button>
       </div>
       <div className="chat-messages">
         {messages.map((message, index) => (

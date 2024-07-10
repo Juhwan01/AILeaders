@@ -3,6 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import json
+import os
 from langchain_core.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
@@ -35,6 +36,7 @@ prompt = PromptTemplate.from_template(
 )
 
 # LLM 설정
+
 llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
 
 # JSON 데이터셋 로드 함수
