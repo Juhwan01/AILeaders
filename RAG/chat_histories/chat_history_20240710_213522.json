@@ -1,0 +1,18 @@
+[
+  {
+    "text": "[PERSON].",
+    "sender": "user"
+  },
+  {
+    "text": "죄송합니다. [PERSON] 데 [PERSON] 발생했습니다.",
+    "sender": "bot"
+  },
+  {
+    "text": "난 [PERSON]",
+    "sender": "user"
+  },
+  {
+    "text": "[PERSON] [PERSON] [PERSON] 수 [PERSON].",
+    "sender": "bot"
+  }
+]
