@@ -1,0 +1,10 @@
+[
+  {
+    "text": "[PERSON] [PERSON]",
+    "sender": "user"
+  },
+  {
+    "text": "[PERSON] [PERSON] [PERSON] [PERSON] [PERSON] [PERSON] 수 [PERSON].",
+    "sender": "bot"
+  }
+]

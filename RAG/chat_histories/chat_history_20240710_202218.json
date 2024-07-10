@@ -1,0 +1,18 @@
+[
+  {
+    "text": "[PHONE]",
+    "sender": "user"
+  },
+  {
+    "text": "죄송합니다. [NAME] [NAME] 데 [NAME] 발생했습니다.",
+    "sender": "bot"
+  },
+  {
+    "text": "00013",
+    "sender": "user"
+  },
+  {
+    "text": "죄송합니다. [NAME] [NAME] 데 [NAME] 발생했습니다.",
+    "sender": "bot"
+  }
+]
