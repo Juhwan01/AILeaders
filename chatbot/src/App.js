@@ -19,8 +19,9 @@ const ChatbotUI = () => {
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const [language, setLanguage] = useState('ko');
-  const [isLoading, setIsLoading] = useState(false); // 새로운 상태 추가
+  const [isLoading, setIsLoading] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -67,6 +68,7 @@ const ChatbotUI = () => {
 
   const speak = async (text) => {
     try {
+      setIsSpeaking(true);
       const response = await axiosInstance.post(
         "/tts",
         { text: text, lang: language === 'ko' ? 'ko' : 'en' },
@@ -76,9 +78,12 @@ const ChatbotUI = () => {
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
-      audio.play();
+      
+      audio.onended = () => setIsSpeaking(false);
+      await audio.play();
     } catch (error) {
       console.error('TTS Error:', error);
+      setIsSpeaking(false);
     }
   };
 
@@ -192,13 +197,15 @@ const ChatbotUI = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="메시지를 입력하세요..."
           onKeyDown={handleKeyDown}
+          disabled={isSpeaking || isLoading}
         />
-        <button onClick={() => handleSend()} className="send-button">
+        <button onClick={() => handleSend()} className="send-button" disabled={isSpeaking || isLoading}>
           전송
         </button>
         <button 
           onClick={isListening ? stopListening : startListening}
           className={`voice-button ${isListening ? 'listening' : ''}`}
+          disabled={isSpeaking || isLoading}
         >
           {isListening ? '음성 입력 중지' : '음성 입력 시작'}
         </button>
