@@ -113,7 +113,7 @@ async def save_chat(chat_history: ChatHistory):
     return {"message": "Masked chat history saved successfully", "file": filename}
 
 
-@router.post("/api/tts")
+@router.post("/tts")
 async def text_to_speech(request: TTSRequest):
     tts = gTTS(text=request.text, lang=request.lang)
     fp = io.BytesIO()
