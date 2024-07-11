@@ -12,3 +12,4 @@ class ChainStore:
 
     def get_chain(self):
         return self.chain
+    

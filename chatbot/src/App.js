@@ -19,6 +19,9 @@ const ChatbotUI = () => {
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const [language, setLanguage] = useState('ko');
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingDots, setLoadingDots] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -30,6 +33,18 @@ const ChatbotUI = () => {
     scrollToBottom();
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
+
+  useEffect(() => {
+    let interval;
+    if (isLoading) {
+      let dots = '';
+      interval = setInterval(() => {
+        dots = dots.length >= 4 ? '' : dots + '.';
+        setLoadingDots(dots);
+      }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
@@ -53,6 +68,7 @@ const ChatbotUI = () => {
 
   const speak = async (text) => {
     try {
+      setIsSpeaking(true);
       const response = await axiosInstance.post(
         "/tts",
         { text: text, lang: language === 'ko' ? 'ko' : 'en' },
@@ -62,9 +78,11 @@ const ChatbotUI = () => {
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
-      audio.play();
+      audio.onended = () => setIsSpeaking(false);
+      await audio.play();
     } catch (error) {
       console.error('TTS Error:', error);
+      setIsSpeaking(false);
     }
   };
 
@@ -93,9 +111,17 @@ const ChatbotUI = () => {
     setMessages(prevMessages => [...prevMessages, newMessage]);
     setInput('');
 
+    setIsLoading(true);
+    setMessages(prevMessages => [...prevMessages, { sender: 'bot', loading: true }]);
+
     const answer = await getAnswer(text);
-    const botMessage = { text: answer, sender: 'bot' };
-    setMessages(prevMessages => [...prevMessages, botMessage]);
+    
+    setMessages(prevMessages => {
+      const updatedMessages = [...prevMessages];
+      updatedMessages[updatedMessages.length - 1] = { text: answer, sender: 'bot', loading: false };
+      return updatedMessages;
+    });
+    setIsLoading(false);
 
     speak(answer);
     resetTranscript();
@@ -109,10 +135,16 @@ const ChatbotUI = () => {
 
   const handleEndChat = async () => {
     try {
-      // 서버에 대화 내용 전송
-      await axiosInstance.post("/save_chat", { messages: messages });
+      const dialogueSetId = `B${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+  
+      const formattedMessages = messages.map((message, index) => ({
+        대화셋일련번호: dialogueSetId,
+        고객질문: message.sender === 'user' ? message.text : "",
+        상담사답변: message.sender === 'bot' ? message.text : ""
+      }));
+  
+      await axiosInstance.post("/save_chat", { messages: formattedMessages });
       
-      // 대화 내용 초기화
       setMessages([]);
       localStorage.removeItem('chatMessages');
       
@@ -138,7 +170,17 @@ const ChatbotUI = () => {
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.sender}`}>
-            {message.sender === 'user' ? '👤' : '🤖'} {message.text}
+            {message.sender === 'user' ? '👤' : '🤖'} 
+            <div className="message-content">
+              {message.loading ? (
+                <div className="loading-message">
+                  <span className="loading-text">AI가 답변을 생성 중입니다</span>
+                  <span className="loading-dots">{loadingDots}</span>
+                </div>
+              ) : (
+                message.text
+              )}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -150,13 +192,15 @@ const ChatbotUI = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="메시지를 입력하세요..."
           onKeyDown={handleKeyDown}
+          disabled={isSpeaking || isLoading}
         />
-        <button onClick={() => handleSend()} className="send-button">
+        <button onClick={() => handleSend()} className="send-button" disabled={isSpeaking || isLoading}>
           전송
         </button>
         <button 
           onClick={isListening ? stopListening : startListening}
           className={`voice-button ${isListening ? 'listening' : ''}`}
+          disabled={isSpeaking || isLoading}
         >
           {isListening ? '음성 입력 중지' : '음성 입력 시작'}
         </button>
