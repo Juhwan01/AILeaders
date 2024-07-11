@@ -14,10 +14,8 @@ from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 from langchain.vectorstores import FAISS
 from kiwipiepy import Kiwi
-
 load_dotenv()
-OPENAI_API_KEY = os.getenv("openai_api_key")
-
+openai_api_key = os.getenv("OPENAI_API_KEY")
 kiwi = Kiwi()
 # 프롬프트 템플릿 설정
 prompt = PromptTemplate.from_template(

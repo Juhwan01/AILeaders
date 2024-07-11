@@ -21,23 +21,77 @@ import os
 import re
 from gtts import gTTS
 
+from openai import OpenAI
+from fastapi import HTTPException
+from dotenv import load_dotenv
+
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("openai_api_key")
+client = OpenAI(api_key=OPENAI_API_KEY)
+
 router = APIRouter()
 name = "users"
 chain_store= ChainStore()
 
 
+async def mask_personal_info(text):
+    print("start")
+    if not text.strip():  # 빈 문자열이면 그대로 반환
+        return text
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": """당신은 개인정보 보호 전문가입니다. 주어진 텍스트에서 개인정보를 식별하고 정확히 마스킹하는 것이 당신의 임무입니다. 다음 지침을 따라 주어진 텍스트를 처리하세요:
 
-def mask_personal_info(text):
-    # 이름 마스킹
-    text = re.sub(r'\b[가-힣]{2,4}\b', '[PERSON]', text)
+1. 이름: 성을 제외한 이름을 '*'로 대체합니다. 예: 홍길동 -> 홍**
+2. 주민등록번호: 앞 6자리를 제외한 나머지를 '*'로 대체합니다. 예: 901225-1234567 -> 901225-*******
+3. 전화번호: 중간 4자리를 '*'로 대체합니다. 예: 010-1234-5678 -> 010-****-5678
+4. 이메일 주소: '@' 앞부분의 절반을 '*'로 대체합니다. 예: example@email.com -> exa***@email.com
+5. 주소: 시/군/구 이후의 상세 주소를 '*'로 대체합니다. 예: 서울시 강남구 테헤란로 152 -> 서울시 강남구 *****
+6. 신용카드 번호: 마지막 4자리를 제외한 나머지를 '*'로 대체합니다. 예: 1234-5678-9012-3456 -> ****-****-****-3456
+7. 계좌번호: 앞 4자리와 뒤 2자리를 제외한 나머지를 '*'로 대체합니다. 예: 123-456-789012 -> 123-***-**9012
+8. IP 주소: 마지막 옥텟을 '*'로 대체합니다. 예: 192.168.0.1 -> 192.168.0.*
+
+추가적인 텍스트를 생성하지 마세요. 원본 텍스트를 그대로 유지하면서 개인정보만 마스킹하세요. 개인정보가 없는 경우 원본 텍스트를 그대로 반환하세요."""},
+                {"role": "user", "content": text}
+            ]
+        )
+        masked_text = response.choices[0].message.content.strip()
+        # 추가 설명이 포함된 경우 제거
+        if "개인정보" in masked_text:
+            return text  # 원본 텍스트 반환
+        return masked_text
+    except Exception as e:
+        logger.error(f"Error masking personal information: {str(e)}")
+        return text  # 에러 발생 시 원본 텍스트 반환
+
+@router.post("/save_chat")
+async def save_chat(chat_history: ChatHistory):
+    save_dir = "chat_histories"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
     
-    # 이메일 주소 마스킹
-    text = re.sub(r'\b[\w\.-]+@[\w\.-]+\.\w+\b', '[EMAIL]', text)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"chat_history_{timestamp}.json"
+    filepath = os.path.join(save_dir, filename)
     
-    # 전화번호 마스킹 (다양한 형식)
-    text = re.sub(r'\b(\d{2,4}[-\s]?)+\d{4}\b', '[PHONE]', text)
+    masked_messages = []
+    for message in chat_history.messages:
+        masked_message = {
+            "대화셋일련번호": message.대화셋일련번호,
+            "고객질문": await mask_personal_info(message.고객질문),
+            "상담사답변": message.상담사답변
+        }
+        masked_messages.append(masked_message)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(masked_messages, f, ensure_ascii=False, indent=2)
     
-    return text
+    logger.debug(f"Saved masked chat history to {filepath}")
+    appendData(filename)
+    return {"message": "Masked chat history saved successfully", "file": filename}
 
 def translate_to_korean(text):
     try:
@@ -84,33 +138,6 @@ async def use_chain(payload: ChainDTO,store: ChainStore = Depends(get_chain_stor
     else:
         return JSONResponse(content={"message": "Chain not found"}, status_code=404)
 
-@router.post("/save_chat")
-async def save_chat(chat_history: ChatHistory):
-    save_dir = "chat_histories"
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"chat_history_{timestamp}.json"
-    filepath = os.path.join(save_dir, filename)
-    
-    masked_messages = []
-    for message in chat_history.messages:
-        masked_message = {
-            "대화셋일련번호": message.대화셋일련번호,
-            # "고객질문(요청)": mask_personal_info(message.고객질문_요청),
-            # "상담사질문(요청)": mask_personal_info(message.상담사질문_요청)
-            "고객질문": message.고객질문,
-            "상담사답변": message.상담사답변
-        }
-        masked_messages.append(masked_message)
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(masked_messages, f, ensure_ascii=False, indent=2)
-    
-    logger.debug(f"Saved masked chat history to {filepath}")
-    appendData(filename)
-    return {"message": "Masked chat history saved successfully", "file": filename}
 
 
 @router.post("/tts")

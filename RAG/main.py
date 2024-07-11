@@ -10,6 +10,9 @@ from dependencies.config import get_config
 from routers import router as main_router
 from routers.users.user_controller import ChainStart
 import asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 init_db(config=get_config())

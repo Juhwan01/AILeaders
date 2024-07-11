@@ -1,0 +1,42 @@
+[
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "파이썬으로 간단한 코드짜줘",
+    "상담사답변": ""
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "",
+    "상담사답변": "주어진 문맥에서 파이썬 코드와 관련된 정보는 찾을 수 없습니다. 하지만 간단한 파이썬 코드를 원하신다면, 예를 들어 \"Hello, World!\"를 출력하는 코드를 제공해드릴 수 있습니다.\n\n```python\nprint(\"Hello, World!\")\n```\n\n이 코드는 파이썬에서 가장 기본적인 예제로, \"Hello, World!\"라는 문자열을 출력합니다. 추가적인 코드가 필요하시면 구체적인 요구사항을 알려주세요."
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "나는 김**다",
+    "상담사답변": ""
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "",
+    "상담사답변": "주어진 정보에서 질문에 대한 정보를 찾을 수 없습니다."
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "신청기간이 어떻게 될까요?",
+    "상담사답변": ""
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "",
+    "상담사답변": "신청기간은 고지서를 받은 날부터 3달 이내입니다."
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "파이썬 코** 짜***",
+    "상담사답변": ""
+  },
+  {
+    "대화셋일련번호": "B90280",
+    "고객질문": "",
+    "상담사답변": "질문에 대한 답변을 위해 주어진 문맥을 분석한 결과, 파이썬 코드와 관련된 정보는 포함되어 있지 않습니다. 따라서, 문맥과 무관하게 일반적인 파이썬 코드를 작성해 드리겠습니다. 예를 들어, 간단한 계산기를 만드는 코드를 작성해 보겠습니다.\n\n```python\ndef add(x, y):\n    return x + y\n\ndef subtract(x, y):\n    return x - y\n\ndef multiply(x, y):\n    return x * y\n\ndef divide(x, y):\n    if y == 0:\n        return \"Error! Division by zero.\"\n    return x / y\n\ndef calculator():\n    print(\"Select operation:\")\n    print(\"1. Add\")\n    print(\"2. Subtract\")\n    print(\"3. Multiply\")\n    print(\"4. Divide\")\n\n    choice = input(\"Enter choice(1/2/3/4): \")\n\n    if choice in ['1', '2', '3', '4']:\n        num1 = float(input(\"Enter first number: \"))\n        num2 = float(input(\"Enter second number: \"))\n\n        if choice == '1':\n            print(f\"{num1} + {num2} = {add(num1, num2)}\")\n\n        elif choice == '2':\n            print(f\"{num1} - {num2} = {subtract(num1, num2)}\")\n\n        elif choice == '3':\n            print(f\"{num1} * {num2} = {multiply(num1, num2)}\")\n\n        elif choice == '4':\n            print(f\"{num1} / {num2} = {divide(num1, num2)}\")\n    else:\n        print(\"Invalid input\")\n\nif __name__ == \"__main__\":\n    calculator()\n```\n\n이 코드는 간단한 계산기 프로그램으로, 덧셈, 뺄셈, 곱셈, 나눗셈을 수행할 수 있습니다. 사용자는 원하는 연산을 선택하고 두 숫자를 입력하면 결과를 출력합니다."
+  }
+]
