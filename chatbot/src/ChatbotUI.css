@@ -1,191 +1,211 @@
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  #root {
-    height: 100%;
-  }
-  
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+.chatbot-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.chat-header {
+  background-color: #4a90e2;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.input-area input:disabled,
+.input-area button:disabled {
+  background-color: #f0f0f0;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-area button:disabled {
+  border-color: #ccc;
+}
+
+.voice-button.listening:disabled {
+  background-color: #ff9999;
+  color: #666;
+}
+
+.send-button:disabled {
+  background-color: #cccccc;
+}
+
+.chat-header h2 {
+  margin: 0;
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.language-selector {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  background-color: white;
+  color: #4a90e2;
+  cursor: pointer;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  min-height: 40px; /* 최소 높이 설정 */
+  display: flex;
+  align-items: center;
+}
+
+.message-content {
+  width: 100%;
+  min-height: 20px; /* 내용의 최소 높이 */
+}
+
+
+.user {
+  align-self: flex-end;
+  background-color: #4a90e2;
+  color: white;
+}
+
+.bot {
+  align-self: flex-start;
+  background-color: #f1f0f0;
+  color: black;
+}
+
+.input-area {
+  display: flex;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+input {
+  flex: 1;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  outline: none;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.send-button {
+  background-color: #4a90e2;
+}
+
+.voice-button {
+  background-color: #34a853;
+}
+
+.voice-button.listening {
+  background-color: #ea4335;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
   .chatbot-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 800px;
-    margin: 0 auto;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  .chat-header {
-    background-color: #4a90e2;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .chat-header h2 {
-    margin: 0;
-  }
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-  .language-selector {
-    padding: 5px 10px;
-    font-size: 14px;
+    height: 100%;
     border: none;
-    border-radius: 5px;
-    background-color: white;
-    color: #4a90e2;
-    cursor: pointer;
   }
-  
-  .message {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    word-wrap: break-word;
-    min-height: 40px; /* 최소 높이 설정 */
-    display: flex;
-    align-items: center;
-  }
-  
-  .message-content {
-    width: 100%;
-    min-height: 20px; /* 내용의 최소 높이 */
-  }
-  
-  
-  .user {
-    align-self: flex-end;
-    background-color: #4a90e2;
-    color: white;
-  }
-  
-  .bot {
-    align-self: flex-start;
-    background-color: #f1f0f0;
-    color: black;
-  }
-  
+
   .input-area {
-    display: flex;
-    padding: 20px;
-    background-color: #f9f9f9;
-  }
-  
-  input {
-    flex: 1;
-    padding: 10px 15px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 30px;
-    outline: none;
+    flex-direction: column;
   }
   
   button {
-    margin-left: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  .loading-message {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
   
-  .send-button {
+  .loading-text {
+    flex-grow: 1;
+  }
+  
+  .loading-dots {
+    width: 40px;
+    text-align: right;
+  }
+  
+  .loading-dots::after {
+    content: '';
+    animation: loadingDots 2s infinite;
+  }
+  
+  @keyframes loadingDots {
+    0% { content: '.'; }
+    25% { content: '..'; }
+    50% { content: '...'; }
+    75% { content: '....'; }
+  }
+  .loading-message {
+    display: flex;
+    align-items: center;
+  }
+  
+  .loading-dots span {
+    width: 10px;
+    height: 10px;
+    margin: 0 5px;
     background-color: #4a90e2;
+    border-radius: 50%;
+    opacity: 0;
+    animation: loadingDots 1.5s infinite ease-in-out;
   }
   
-  .voice-button {
-    background-color: #34a853;
+  .loading-dots span:nth-child(2) {
+    animation-delay: 0.5s;
   }
   
-  .voice-button.listening {
-    background-color: #ea4335;
+  .loading-dots span:nth-child(3) {
+    animation-delay: 1s;
   }
   
-  button:hover {
-    opacity: 0.9;
+  @keyframes loadingDots {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
   }
-  
-  @media (max-width: 600px) {
-    .chatbot-container {
-      height: 100%;
-      border: none;
-    }
-  
-    .input-area {
-      flex-direction: column;
-    }
-    
-    button {
-      margin-left: 0;
-      margin-top: 10px;
-    }
-    .loading-message {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-    
-    .loading-text {
-      flex-grow: 1;
-    }
-    
-    .loading-dots {
-      width: 40px;
-      text-align: right;
-    }
-    
-    .loading-dots::after {
-      content: '';
-      animation: loadingDots 2s infinite;
-    }
-    
-    @keyframes loadingDots {
-      0% { content: '.'; }
-      25% { content: '..'; }
-      50% { content: '...'; }
-      75% { content: '....'; }
-    }
-    .loading-message {
-      display: flex;
-      align-items: center;
-    }
-    
-    .loading-dots span {
-      width: 10px;
-      height: 10px;
-      margin: 0 5px;
-      background-color: #4a90e2;
-      border-radius: 50%;
-      opacity: 0;
-      animation: loadingDots 1.5s infinite ease-in-out;
-    }
-    
-    .loading-dots span:nth-child(2) {
-      animation-delay: 0.5s;
-    }
-    
-    .loading-dots span:nth-child(3) {
-      animation-delay: 1s;
-    }
-    
-    @keyframes loadingDots {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 1; }
-    }
-  }
+}
