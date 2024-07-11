@@ -18,10 +18,16 @@ from datetime import datetime
 import json
 import os
 import re
+from gliner import GLiNER
+
 
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+
+
+
 
 init_db(config=get_config())
 
@@ -31,6 +37,14 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = GLiNER.from_pretrained("knowledgator/gliner-multitask-large-v0.5", device="cuda")
+    return model
 
 app.include_router(router=main_router)
 
@@ -74,6 +88,24 @@ async def add_cors_to_response(
 
 
 
+def mask_personal_info(text):
+    model = get_model()
+    
+    labels = ["person", "phone_number", "email", "address", "id_number", "credit_card", "bank_account"]
+    '''이름, 전화번호, 이메일, 주소, 주민번호, 신용카드번호, 계좌번호'''
+    '''주소 반영이 안 됨''' 
+       
+    entities = model.predict_entities(text, labels)
+    
+    masked_text = text
+    for entity in reversed(entities):
+        start = entity["start"]
+        end = entity["end"]
+        masked_text = masked_text[:start] + '*' * (end - start) + masked_text[end:]
+    
+    return masked_text
+
+
 class Message(BaseModel):
     sender: str
     text: str
@@ -108,11 +140,12 @@ async def save_chat(chat_history: ChatHistory):
     
     for message in chat_history.messages:
         qa = "Q" if message.sender == "user" else "A"
+        masked_text = mask_personal_info(message.text)  # 여기서 마스킹 적용
         formatted_message = {
             "대화셋일련번호": dialogue_set_number,
             "QA": qa,
-            "고객질문(요청)": message.text if message.sender == "user" else "",
-            "답변": message.text if message.sender != "user" else ""
+            "고객질문(요청)": masked_text if message.sender == "user" else "",
+            "답변": masked_text if message.sender != "user" else ""
         }
         formatted_messages.append(formatted_message)
 
