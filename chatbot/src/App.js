@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import './ChatbotUI.css';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 
 const axiosInstance = axios.create({
   baseURL: process.env.NODE_ENV === 'development' 
@@ -22,6 +23,7 @@ const ChatbotUI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -136,81 +138,94 @@ const ChatbotUI = () => {
 
   const handleEndChat = async () => {
     try {
-      // 대화셋에 대한 고유 일련번호 생성
       const dialogueSetId = `B${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
-  
-      // 대화 내용을 새로운 형식으로 변환
       const formattedMessages = messages.map((message, index) => ({
         대화셋일련번호: dialogueSetId,
         고객질문: message.sender === 'user' ? message.text : "",
         상담사답변: message.sender === 'bot' ? message.text : ""
       }));
   
-      // 서버에 대화 내용 전송
       await axiosInstance.post("/save_chat", { messages: formattedMessages });
       
-      // 대화 내용 초기화
       setMessages([]);
       localStorage.removeItem('chatMessages');
       
       alert('대화가 서버에 저장되었고, 채팅이 초기화되었습니다.');
+      setShowChatbot(false);  // 챗봇 화면을 숨깁니다
     } catch (error) {
       console.error('Error saving chat:', error);
       alert('대화 저장 중 오류가 발생했습니다.');
     }
   };
-
-  return (
-    <div className="chatbot-container">
-      <div className="chat-header">
-        <h2>AI 챗봇</h2>
-        <select value={language} onChange={handleLanguageChange} className="language-selector">
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-        </select>
-        <button onClick={handleEndChat} className="end-chat-button">
-          대화 종료
-        </button>
-      </div>
-      <div className="chat-messages">
-        {messages.map((message, index) => (
-          <div key={index} className={`message ${message.sender}`}>
-            {message.sender === 'user' ? '👤' : '🤖'} 
-            <div className="message-content">
-              {message.loading ? (
-                <div className="loading-message">
-                  <span className="loading-text">AI가 답변을 생성 중입니다</span>
-                  <span className="loading-dots">{loadingDots}</span>
-                </div>
-              ) : (
-                message.text
-              )}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      <div className="input-area">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="메시지를 입력하세요..."
-          onKeyDown={handleKeyDown}
-          disabled={isSpeaking || isLoading}
-        />
-        <button onClick={() => handleSend()} className="send-button" disabled={isSpeaking || isLoading}>
-          전송
-        </button>
-        <button 
-          onClick={isListening ? stopListening : startListening}
-          className={`voice-button ${isListening ? 'listening' : ''}`}
-          disabled={isSpeaking || isLoading}
-        >
-          {isListening ? '음성 입력 중지' : '음성 입력 시작'}
-        </button>
-      </div>
+  
+  const TouchScreen = ({ onEnter }) => (
+    <div className="touch-screen" onClick={onEnter}>
+      <h1>터치하여 AI 챗봇 시작</h1>
     </div>
+  );
+  return (
+    <SwitchTransition>
+      <CSSTransition
+        key={showChatbot ? "chatbot" : "touchscreen"}
+        timeout={500}
+        classNames="fade"
+      >
+        {showChatbot ? (
+          <div className="chatbot-container">
+            <div className="chat-header">
+              <h2>AI 챗봇</h2>
+              <select value={language} onChange={handleLanguageChange} className="language-selector">
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+              </select>
+              <button onClick={handleEndChat} className="end-chat-button">
+                대화 종료
+              </button>
+            </div>
+            <div className="chat-messages">
+            {messages.map((message, index) => (
+              <div key={index} className={`message ${message.sender}`}>
+                {message.sender === 'user' ? '👤' : '🤖'} 
+                <div className="message-content">
+                  {message.loading ? (
+                    <div className="loading-message">
+                      <span className="loading-text">AI가 답변을 생성 중입니다</span>
+                      <span className="loading-dots">{loadingDots}</span>
+                    </div>
+                  ) : (
+                    message.text
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="input-area">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="메시지를 입력하세요..."
+              onKeyDown={handleKeyDown}
+              disabled={isSpeaking || isLoading}
+            />
+            <button onClick={() => handleSend()} className="send-button" disabled={isSpeaking || isLoading}>
+              전송
+            </button>
+            <button 
+              onClick={isListening ? stopListening : startListening}
+              className={`voice-button ${isListening ? 'listening' : ''}`}
+              disabled={isSpeaking || isLoading}
+            >
+              {isListening ? '음성 입력 중지' : '음성 입력 시작'}
+            </button>
+          </div>
+          </div>
+        ) : (
+          <TouchScreen onEnter={() => setShowChatbot(true)} />
+        )}
+      </CSSTransition>
+    </SwitchTransition>
   );
 };
 
